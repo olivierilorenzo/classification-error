@@ -21,7 +21,7 @@ def bayes_border(mu1, sigma1, mu2, sigma2, prior1, prior2):
     else:
         # two intersections; both parameters are different
         d = (b ** 2) - (4 * a * c)
-        if d > 0:
+        if d >= 0:
             b1 = (-b + math.sqrt(d)) / (2 * a)
             b2 = (-b - math.sqrt(d)) / (2 * a)
         else:

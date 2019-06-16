@@ -13,7 +13,7 @@ def class_balance_test(gauss_distr):
     sheet1 = wb['Foglio1']
     row = 4
     column = 2
-    test_list = [[100, 100], [100, 200], [200, 100], [200, 200], [200, 400], [400, 200], [500, 500], [500, 1000], [1000, 500], [1000, 1000]]
+    test_list = [[100, 100], [100, 200], [200, 100], [200, 200], [200, 400], [400, 200], [500, 500], [700, 1000], [1000, 700], [1000, 1000]]
     mu1 = gauss_distr[0]
     sigma1 = gauss_distr[1]
     mu2 = gauss_distr[2]
@@ -85,7 +85,7 @@ def dataset_test(gauss_distr, classifier, validation, sample_estimate=False):
                 tmp2 = conf_matrix[1, 0] / list(y).count(1)
                 tmp = (conf_matrix[0, 1] + conf_matrix[1, 0]) / len(y)
 
-            if validation == 'holdup':
+            if validation == 'holdout':
                 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.4, random_state=0, stratify=y)
 
                 if sample_estimate:
