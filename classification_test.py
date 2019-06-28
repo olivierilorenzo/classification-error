@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn import metrics
 from bayes_classifier import bayes_rule
-from classifier_selector import ClassifierSelector
+from utils import ClassifierSelector
 
 
 def class_balance_test(gauss_distr):
