@@ -26,14 +26,7 @@ def bayes_border(mu1, sigma1, mu2, sigma2, prior1, prior2):
             b2 = (-b - math.sqrt(d)) / (2 * a)
         else:
             print('No intersections...')
-    """
-    t = np.linspace(mu1 - 3 * sigma1, mu1 + 3 * sigma1, 100)
-    plt.plot(t, prior1*stats.norm.pdf(t, mu1, sigma1), color='green')
-    plt.plot(t, prior2*stats.norm.pdf(t, mu2, sigma2), color='red')
-    plt.axvline(b1)
-    plt.axvline(b2)
-    plt.show()
-    """
+
     return b1, b2
 
 
@@ -57,4 +50,4 @@ def bayes_rule(data, mu1, sigma1, mu2, sigma2, prior1, prior2):
         else:
             predict.append(0)
 
-    return predict, e1, e2
+    return predict, e1, e2, border1, border2

@@ -5,10 +5,15 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn import metrics
 from bayes_classifier import bayes_rule
-from utils import ClassifierSelector
+from utils import ClassifierSelector, dataset_loader, plot_hist
 
 
 def class_balance_test(gauss_distr):
+    """
+    :param gauss_distr: is a list that contains param of two 1-d gaussian distributions
+           [mean1, deviation1, mean2, deviation2]
+    :return: print results in a excel file
+    """
     wb = load_workbook("error-estimates.xlsx")
     sheet1 = wb['Foglio1']
     row = 4
@@ -28,7 +33,7 @@ def class_balance_test(gauss_distr):
 
         p1 = test[0]/(test[0]+test[1])  # prior probability
         p2 = test[1] / (test[0] + test[1])
-        y_pred, e1, e2 = bayes_rule(x, mu1, sigma1, mu2, sigma2, p1, p2)
+        y_pred, e1, e2, b1, b2 = bayes_rule(x, mu1, sigma1, mu2, sigma2, p1, p2)
 
         conf_matrix = metrics.confusion_matrix(y, y_pred)
         tmp1 = conf_matrix[0, 1] / list(y).count(0)
@@ -44,7 +49,16 @@ def class_balance_test(gauss_distr):
         column += 1
 
 
-def dataset_test(gauss_distr, classifier, validation, sample_estimate=False):
+def dataset_test(classifier, validation, sample_estimate=False, shuffle=True, real_dataset=False):
+    """
+    :param classifier: choose between bayes, kNN, MLP and Tree
+    :param validation: choose between resub, holdout and cross
+    :param sample_estimate: works only with bayes classifier
+    :param shuffle: if False dataset is composed by all class1 elements then all class2 elements
+    :param real_dataset: if True use the bank loan dataset, else dataset is generated from two 1-d gaussian distribution
+           does not work with bayes classifier
+    :return: print results in a excel file
+    """
     wb = load_workbook("error-estimates.xlsx")
     sheet1 = wb['Foglio1']
     row = 29
@@ -52,31 +66,44 @@ def dataset_test(gauss_distr, classifier, validation, sample_estimate=False):
     error1 = []
     error2 = []
     error = []
-    e1, e2, tmp1, tmp2, tmp = 0, 0, 0, 0, 0
-    test_list = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
-    mu1 = gauss_distr[0]
-    sigma1 = gauss_distr[1]
-    mu2 = gauss_distr[2]
-    sigma2 = gauss_distr[3]
+    test_list = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000]
+    e1, e2, b1, b2, tmp1, tmp2, tmp = 0, 0, 0, 0, 0, 0, 0
+    mu1 = 0
+    sigma1 = math.sqrt(1)
+    mu2 = 0
+    sigma2 = math.sqrt(0.25)
     clf = ClassifierSelector(classifier)
 
     for test in test_list:
         for i in range(10):
-            x1 = np.random.normal(mu1, sigma1, test)
-            x2 = np.random.normal(mu2, sigma2, test)
-            x = np.concatenate((x1, x2), axis=0)
-            y1 = np.zeros(test)
-            y2 = np.full(test, 1)
-            y = np.concatenate((y1, y2), axis=0)
+            if real_dataset:
+                x, y = dataset_loader(test)
+                if shuffle:
+                    shuffle_idx = np.arange(len(y))
+                    np.random.shuffle(shuffle_idx)
+                    x = x[shuffle_idx, :]
+                    y = y[shuffle_idx]
+            else:
+                x1 = np.random.normal(mu1, sigma1, test)
+                x2 = np.random.normal(mu2, sigma2, test)
+                x = np.concatenate((x1, x2), axis=0)
+                y1 = np.zeros(test)
+                y2 = np.full(test, 1)
+                y = np.concatenate((y1, y2), axis=0)
+                if shuffle:
+                    shuffle_idx = np.arange(len(y))
+                    np.random.shuffle(shuffle_idx)
+                    x = x[shuffle_idx]
+                    y = y[shuffle_idx]
 
             if validation == 'resub':
-                if sample_estimate:
-                    mu1 = np.mean(x1)
-                    mu2 = np.mean(x2)
-                    sigma1 = math.sqrt(np.var(x1))
-                    sigma2 = math.sqrt(np.var(x2))
                 if classifier == 'bayes':
-                    y_pred, e1, e2 = bayes_rule(x, mu1, sigma1, mu2, sigma2, 0.5, 0.5)
+                    if sample_estimate:
+                        mu1 = np.mean(x1)
+                        mu2 = np.mean(x2)
+                        sigma1 = math.sqrt(np.var(x1))
+                        sigma2 = math.sqrt(np.var(x2))
+                    y_pred, e1, e2, b1, b2 = bayes_rule(x, mu1, sigma1, mu2, sigma2, 0.5, 0.5)
                 else:
                     clf.fit(x, y)
                     y_pred = clf.predict(x)
@@ -88,16 +115,15 @@ def dataset_test(gauss_distr, classifier, validation, sample_estimate=False):
             if validation == 'holdout':
                 x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.4, random_state=0, stratify=y)
 
-                if sample_estimate:
-                    x1 = x_train[y_train == 0]
-                    x2 = x_train[y_train == 1]
-                    mu1 = np.mean(x1)
-                    mu2 = np.mean(x2)
-                    sigma1 = math.sqrt(np.var(x1))
-                    sigma2 = math.sqrt(np.var(x2))
-
                 if classifier == 'bayes':
-                    y_pred, e1, e2 = bayes_rule(x_test, mu1, sigma1, mu2, sigma2, 0.5, 0.5)
+                    if sample_estimate:
+                        x1 = x_train[y_train == 0]
+                        x2 = x_train[y_train == 1]
+                        mu1 = np.mean(x1)
+                        mu2 = np.mean(x2)
+                        sigma1 = math.sqrt(np.var(x1))
+                        sigma2 = math.sqrt(np.var(x2))
+                    y_pred, e1, e2, b1, b2 = bayes_rule(x_test, mu1, sigma1, mu2, sigma2, 0.5, 0.5)
                 else:
                     clf.fit(x_train, y_train)
                     y_pred = clf.predict(x_test)
@@ -119,16 +145,15 @@ def dataset_test(gauss_distr, classifier, validation, sample_estimate=False):
                     x_train, x_test = x[train_index], x[test_index]
                     y_train, y_test = y[train_index], y[test_index]
 
-                    if sample_estimate:
-                        x1 = x_train[y_train == 0]
-                        x2 = x_train[y_train == 1]
-                        mu1 = np.mean(x1)
-                        mu2 = np.mean(x2)
-                        sigma1 = math.sqrt(np.var(x1))
-                        sigma2 = math.sqrt(np.var(x2))
-
                     if classifier == 'bayes':
-                        y_pred, e1, e2 = bayes_rule(x_test, mu1, sigma1, mu2, sigma2, 0.5, 0.5)
+                        if sample_estimate:
+                            x1 = x_train[y_train == 0]
+                            x2 = x_train[y_train == 1]
+                            mu1 = np.mean(x1)
+                            mu2 = np.mean(x2)
+                            sigma1 = math.sqrt(np.var(x1))
+                            sigma2 = math.sqrt(np.var(x2))
+                        y_pred, e1, e2, b1, b2 = bayes_rule(x_test, mu1, sigma1, mu2, sigma2, 0.5, 0.5)
                     else:
                         clf.fit(x_train, y_train)
                         y_pred = clf.predict(x_test)
@@ -174,6 +199,16 @@ def dataset_test(gauss_distr, classifier, validation, sample_estimate=False):
 
         wb.save("error-estimates.xlsx")
         column += 1
+        # plot_hist(x1, x2)
+    """
+    t = np.linspace(mu1 - 3 * sigma1, mu1 + 3 * sigma1, 100)
+    plt.plot(t, prior1*stats.norm.pdf(t, mu1, sigma1), color='green')
+    plt.plot(t, prior2*stats.norm.pdf(t, mu2, sigma2), color='red')
+    plt.axvline(b1)
+    plt.axvline(b2)
+    plt.show()
+    """
     print("Bayes error1", e1)
     print("Bayes error2", e2)
     print("Bayes error", e1+e2)
+    print("Bayes border: {}, {}".format(b1, b2))
