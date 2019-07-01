@@ -73,8 +73,8 @@ def plot_hist(x1, x2):
         ax.scatter(x, y, c=color, s=10, label=label, alpha=0.3, edgecolors='none')
     ax.legend()
     """
-    plt.axvline(-0.67, color="red")
-    plt.axvline(0.67, color="red")
+    plt.axvline(-0.6797779934458726, color="red")
+    plt.axvline(0.6797779934458726, color="red")
     n_bins = 100
     plt.hist(x1, bins=n_bins)
 
@@ -82,3 +82,13 @@ def plot_hist(x1, x2):
 
     # plt.xticks(np.arange(min(x), max(x)+1, 1))
     plt.show()
+
+
+def plot_error(error_list, bayes, info):
+    x = error_list
+    y = np.zeros(len(x))
+    fig, ax = plt.subplots()
+    ax.scatter(x, y, color='green', s=100, alpha=0.3, edgecolors='none')
+    plt.axvline(np.mean(x), color="blue")
+    plt.axvline(bayes, color="red")
+    plt.savefig('plots/test-{}-{}-{}.png'.format(info[0], info[1], info[2]))
