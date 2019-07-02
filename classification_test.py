@@ -5,8 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn import metrics
 from bayes_classifier import bayes_rule
-from utils import ClassifierSelector, dataset_loader, plot_hist, plot_error
-import matplotlib.pyplot as plt
+from utils import ClassifierSelector, dataset_loader, plot_hist, plot_error, plot_distr
 
 
 def class_balance_test(gauss_distr):
@@ -201,9 +200,13 @@ def dataset_test(classifier, validation, sample_estimate=False, shuffle=True, re
 
         wb.save("error-estimates.xlsx")
         column += 1
-        info = [classifier, validation, test]
-        # plot_hist(x1, x2)
+        if classifier == 'bayes' and validation == 'resub' and not sample_estimate:
+            info = [classifier, 'generic', test]
+        else:
+            info = [classifier, validation, test]
+        # plot_hist(x1, x2, info)
         plot_error(error, e1+e2, info)
+        # plot_distr(mu1, sigma1, mu2, sigma2, b1, b2, info)
         error = []
     print("Bayes error1", e1)
     print("Bayes error2", e2)

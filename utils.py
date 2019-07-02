@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import scipy.stats as stats
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -62,26 +63,29 @@ def dataset_loader(n_samples):
     return x, y
 
 
-def plot_hist(x1, x2):
+def plot_hist(x1, x2, info):
+    """
     data = [x1, x2]
 
     colors = ["red", "blue"]
     classes = ["class1", "class2"]
     fig, ax = plt.subplots()
-    """
+
     for color, x, label in zip(colors, data, classes):
         ax.scatter(x, y, c=color, s=10, label=label, alpha=0.3, edgecolors='none')
     ax.legend()
-    """
+
     plt.axvline(-0.6797779934458726, color="red")
     plt.axvline(0.6797779934458726, color="red")
+    """
     n_bins = 100
     plt.hist(x1, bins=n_bins)
 
     plt.hist(x2, bins=n_bins)
 
     # plt.xticks(np.arange(min(x), max(x)+1, 1))
-    plt.show()
+    plt.savefig('plots/samples-{}-{}-{}.png'.format(info[0], info[1], info[2]))
+    plt.clf()
 
 
 def plot_error(error_list, bayes, info):
@@ -90,5 +94,20 @@ def plot_error(error_list, bayes, info):
     fig, ax = plt.subplots()
     ax.scatter(x, y, color='green', s=100, alpha=0.3, edgecolors='none')
     plt.axvline(np.mean(x), color="blue")
-    plt.axvline(bayes, color="red")
-    plt.savefig('plots/test-{}-{}-{}.png'.format(info[0], info[1], info[2]))
+    # plt.axvline(bayes, color="red")
+    plt.text(np.mean(x), -0.010, np.mean(x))
+    # plt.text(bayes, -0.005, bayes)
+    plt.savefig('plots/error-{}-{}-{}.png'.format(info[0], info[1], info[2]))
+    plt.clf()
+
+
+def plot_distr(mu1, sigma1, mu2, sigma2, b1, b2, info):
+    t = np.linspace(mu1 - 3 * sigma1, mu1 + 3 * sigma1, 100)
+    plt.plot(t, 0.5 * stats.norm.pdf(t, mu1, sigma1), color='green')
+    plt.plot(t, 0.5 * stats.norm.pdf(t, mu2, sigma2), color='red')
+    plt.axvline(b1)
+    plt.axvline(b2)
+    plt.text(b1, 0, b1)
+    plt.text(b2, 0.10, b2)
+    plt.savefig('plots/distr-{}-{}-{}.png'.format(info[0], info[1], info[2]))
+    plt.clf()
