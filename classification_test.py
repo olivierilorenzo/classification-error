@@ -18,7 +18,8 @@ def class_balance_test(gauss_distr):
     sheet1 = wb['Foglio1']
     row = 4
     column = 2
-    test_list = [[100, 100], [100, 200], [200, 100], [200, 200], [200, 400], [400, 200], [500, 500], [700, 1000], [1000, 700], [1000, 1000]]
+    test_list = [[100, 100], [100, 200], [200, 100], [200, 200], [200, 400], [400, 200], [500, 500], [700, 1000],
+                 [1000, 700], [1000, 1000]]
     mu1 = gauss_distr[0]
     sigma1 = gauss_distr[1]
     mu2 = gauss_distr[2]
@@ -54,10 +55,11 @@ def dataset_test(classifier, validation, sample_estimate=False, shuffle=True, re
     :param classifier: choose between bayes, kNN, MLP and Tree
     :param validation: choose between resub, holdout and cross
     :param sample_estimate: works only with bayes classifier
-    :param shuffle: if False dataset is composed by all class1 elements then all class2 elements
-    :param real_dataset: if True use the bank loan dataset, else dataset is generated from two 1-d gaussian distribution
-           does not work with bayes classifier
-    :return: print results in a excel file
+    :param shuffle: if False dataset is composed by all class1 elements followed by all class2 elements, otherwise all
+           samples are mixed-up
+    :param real_dataset: if True use the bank loan dataset, else dataset is generated from two 1-d gaussian
+           distribution, does not work with bayes classifier
+    :return: print results in a excel file and save the plots in the plot folder
     """
     wb = load_workbook("error-estimates.xlsx")
     sheet1 = wb['Foglio1']
@@ -66,7 +68,7 @@ def dataset_test(classifier, validation, sample_estimate=False, shuffle=True, re
     error1 = []
     error2 = []
     error = []
-    test_list = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000]
+    test_list = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000]  # single element correspond to sample per class
     e1, e2, b1, b2, tmp1, tmp2, tmp = 0, 0, 0, 0, 0, 0, 0
     mu1 = 0
     sigma1 = math.sqrt(1)

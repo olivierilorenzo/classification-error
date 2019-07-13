@@ -8,7 +8,7 @@ from sklearn.neighbors import KNeighborsClassifier
 
 
 class ClassifierSelector:
-    classifiers = [
+    classifiers = [  # classifiers parameters settings
         KNeighborsClassifier(3),
         DecisionTreeClassifier(max_depth=5),
         MLPClassifier(alpha=1, max_iter=1000)
@@ -24,7 +24,7 @@ class ClassifierSelector:
             self.classifier = self.classifiers[2]
 
     def fit(self, x_train, y_train):
-        if len(x_train.shape) == 1:
+        if len(x_train.shape) == 1:  # when using the sample generated dataset(single feature)
             x_train = np.reshape(x_train, [len(x_train), 1])
         self.classifier.fit(x_train, y_train)
 
@@ -38,7 +38,7 @@ class ClassifierSelector:
 def dataset_loader(n_samples):
     """
     :param n_samples: draws n_samples per class random
-    :return: data x and labels y, result dataset is not shuffled(first class1 then class2)
+    :return: data x and labels y, result dataset is not shuffled(first class1 followed by class2)
     """
     data = pd.read_csv("bank-additional-full.csv", delimiter=";")
     mapping_dict = {"y": {"no": 0, "yes": 1}}
@@ -63,7 +63,7 @@ def dataset_loader(n_samples):
     return x, y
 
 
-def plot_hist(x1, x2, info):
+def plot_hist(x1, x2, info):  # plot histogram of the sample distribution on class1 and class2
     """
     data = [x1, x2]
 
@@ -88,7 +88,7 @@ def plot_hist(x1, x2, info):
     plt.clf()
 
 
-def plot_error(error_list, bayes, info):
+def plot_error(error_list, bayes, info):  # plot the scatter error of the ten tests, along with mean error and bayes err
     x = error_list
     y = np.zeros(len(x))
     fig, ax = plt.subplots()
@@ -101,7 +101,7 @@ def plot_error(error_list, bayes, info):
     plt.clf()
 
 
-def plot_distr(mu1, sigma1, mu2, sigma2, b1, b2, info):
+def plot_distr(mu1, sigma1, mu2, sigma2, b1, b2, info):  # plot two distribution based on parameters
     t = np.linspace(mu1 - 3 * sigma1, mu1 + 3 * sigma1, 100)
     plt.plot(t, 0.5 * stats.norm.pdf(t, mu1, sigma1), color='green')
     plt.plot(t, 0.5 * stats.norm.pdf(t, mu2, sigma2), color='red')
